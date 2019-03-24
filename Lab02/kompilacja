@@ -1,0 +1,5 @@
+gcc -c -fPIC displayGroups.c
+
+
+gcc -shared -fPIC displayGroups.c -o libdisplayGroups.so -nostartfiles
+gcc main.c -o main -L. -ldl -ldisplayGroups -Wl,-rpath,.
