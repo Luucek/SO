@@ -1,3 +1,9 @@
+// SO2 IS1 210B LAB05
+// Patryk Wszola
+// wp41563@zut.edu.pl
+// gcc 41563.so2.lab05.main.c -o lab05
+// ./lab05 /etc/ -dfl
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -16,12 +22,6 @@ void listDirectory(char *arg, int indent)
     struct dirent **namelist;
     int n = 0; //ilosc wszystkich plikow
     char **folders, **foldersNames;
-    folders = malloc(30 * sizeof(char *));
-    for (int i = 0; i < 30; i++)
-        folders[i] = malloc(FILENAME_MAX);
-    foldersNames = malloc(30 * sizeof(char *));
-    for (int i = 0; i < 30; i++)
-        foldersNames[i] = malloc(FILENAME_MAX);
     int f = 0; //ilosc folderow
     struct stat path_stat;
     char *path;
@@ -32,6 +32,13 @@ void listDirectory(char *arg, int indent)
         perror("scandir");
     else
     {
+        folders = malloc(n * sizeof(char *));
+        for (int i = 0; i < n; i++)
+            folders[i] = malloc(FILENAME_MAX);
+        foldersNames = malloc(n * sizeof(char *));
+        for (int i = 0; i < n; i++)
+            foldersNames[i] = malloc(FILENAME_MAX);
+
         while (n--)
         {
             strcpy(path, arg);
@@ -64,6 +71,12 @@ void listDirectory(char *arg, int indent)
                     foldersCounter++;
                     strcpy(foldersNames[f], namelist[n]->d_name);
                     strcpy(folders[f], path);
+
+                    if (flag3 > 0)
+                    {
+                        if (namelist[n]->d_type == DT_LNK)
+                            strcat(foldersNames[f], " (SYMBOLICZNE POL.)");
+                    }
                     f++;
                 }
                 free(namelist[n]);
@@ -85,9 +98,15 @@ void listDirectory(char *arg, int indent)
                 listDirectory(folders[f], ++indent);
                 indent--;
             }
-            free(folders[f]);
+        }
+        for(int i = 0; i < n; i++)
+        {
+            free(folders[i]);
+            free(foldersNames[i]);
         }
         free(folders);
+        free(foldersNames);
+        
     }
 }
 
@@ -124,7 +143,9 @@ int main(int argc, char *artv[])
         listDirectory("./", 0);
     else
     {
-        if (artv[argc - 1][0] != '-')
+        if (artv[argc - 2][1] == 'L')
+            listDirectory("./", 0);
+        else if (artv[argc - 1][0] != '-')
             listDirectory(artv[argc - 1], 0);
         else
             listDirectory("./", 0);
